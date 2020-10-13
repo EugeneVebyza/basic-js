@@ -1,29 +1,34 @@
 module.exports = function transform(arr) {
-  if (!Array.isArray(arr))
-      throw new Error("Not an array");
-  let res = [];
+  if (!Array.isArray(arr)) throw new Error();
 
-  for (let i = 0; i < arr.length; i++) {
-      switch(arr[i]) {
-          case '--discard-next':
-                  i++
-              break;
-          case '--discard-prev':
-              res.pop();
-              break;
-          case '--double-next':
-              if (arr.length > i+2)
-                  res.push(arr[i+1]);
-              break;
-          case '--double-prev':
-              if (i >= 1)
-                  res.push(arr[i-1]);
-              break;
-          default:
-              res.push(arr[i]);
+  let transformedArr = [];
+  let hellper = [];
+  for (let i = 0; i < arr.length; ++i) {
+    switch (arr[i]) {
+      case '--discard-next': {
+        hellper.push(++i);
+        break
       }
+      case '--discard-prev': {
+        if (transformedArr.length > 0 && !hellper.some((x) => x === i - 1)) {
+          transformedArr = transformedArr.slice(0, transformedArr.length - 1);
+          hellper.push(i - 1);
+        }
+        break;
+      }
+      case '--double-next': {
+        if (++i < arr.length) {
+          transformedArr.push(arr[i]);
+          transformedArr.push(arr[i]);
+        }
+        break;
+      }
+      case '--double-prev': {
+        if (i > 0 && !hellper.some((x) => x === i - 1)) transformedArr.push(arr[i - 1]);
+        break;
+      }
+      default: transformedArr.push(arr[i]);
+    }
   }
-
-  return res;
-}
-
+  return transformedArr;
+};
